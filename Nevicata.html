@@ -1,0 +1,119 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Nevicata FILS</title>
+
+</head>
+<script src="../js/pixi.min.js" language="javascript"></script>
+<script src="../js/pixi-particles.js" language="javascript"></script>
+<script src="../js/jquery-3.2.1.min.js" language="javascript"></script>
+<body>
+    <div> 
+        <button type="button" onclick="NevicataLenta()">Nevicata lenta</button>
+        <button type="button" onclick="NevicataMedia()">Nevicata media</button>
+        <button type="button" onclick="NevicataForte()">Nevicata forte</button>
+    </div>
+    <script type="text/javascript">
+        window.VIDEO_WIDTH = 1920;
+        window.VIDEO_HEIGHT = 1080;
+        window.VIDEO_RATIO = (window.VIDEO_WIDTH / window.VIDEO_HEIGHT);
+        window.onresize = this.Resize.bind(this);
+
+        let app = new PIXI.Application({
+            antialias: true,
+            transparent: true,
+            resolution: 1,
+            "width": window.VIDEO_WIDTH,
+            "height": window.VIDEO_HEIGHT,
+            "transparent": true
+            }
+        );
+        app.renderer.view.style.position = "absolute";
+        app.renderer.view.style.display = "block";
+        app.renderer.autoResize = true;
+        app.renderer.resize(window.innerWidth, window.innerHeight);
+        window.Renderer = app.renderer;
+
+
+        document.body.appendChild(app.view);
+
+        let jsonNevicataLenta = null;
+        let jsonNevicataMedia = null;
+        let jsonNevicataForte = null;
+        $.ajax({
+            url: 'NevicataLenta.json',
+            async: false,
+            dataType: 'json',
+            success: function (response) {
+                jsonNevicataLenta = response;
+            }
+        });
+        $.ajax({
+            url: 'NevicataMedia.json',
+            async: false,
+            dataType: 'json',
+            success: function (response) {
+                jsonNevicataMedia = response;
+            }
+        });
+        $.ajax({
+            url: 'NevicataForte.json',
+            async: false,
+            dataType: 'json',
+            success: function (response) {
+                jsonNevicataForte = response;
+            }
+        });
+        let spriteBackground = PIXI.Sprite.from("Background.png");
+        spriteBackground.scale = new PIXI.Point(0.7, 0.7);
+        app.stage.addChild(spriteBackground);
+
+       
+        var emitter = new PIXI.particles.Emitter(app.stage, [PIXI.Texture.fromImage('neve.png')], jsonNevicataLenta); 
+
+
+        function Resize() {
+            var newWidth = window.innerWidth;
+            var newHeight = window.innerHeight;
+            var newWidthToHeight = newWidth / newHeight;
+
+            if (newWidthToHeight > window.VIDEO_RATIO) {
+                newWidth = newHeight * window.VIDEO_RATIO;
+                window.Renderer.view.style.width = newWidth + 'px';
+                window.Renderer.view.style.height = newHeight + 'px';
+
+            } else {
+                newHeight = newWidth / window.VIDEO_RATIO;
+                window.Renderer.view.style.width = newWidth + 'px';
+                window.Renderer.view.style.height = newHeight + 'px';
+            }
+
+        }
+
+        function NevicataLenta() {
+            emitter.init([PIXI.Texture.fromImage('neve.png')], jsonNevicataLenta);  
+        }
+
+
+        function NevicataMedia() {
+            emitter.init([PIXI.Texture.fromImage('neve.png')], jsonNevicataMedia);
+        }
+
+
+        function NevicataForte() {
+            emitter.init([PIXI.Texture.fromImage('neve.png')], jsonNevicataForte);
+        }
+
+        var elapsed = Date.now();
+        function Update() {
+            requestAnimationFrame(Update);
+            var now = Date.now();
+            emitter.update((now - elapsed) * 0.001);
+            elapsed = now;
+        };
+        Update();
+
+</script>
+</body>
+</html>
